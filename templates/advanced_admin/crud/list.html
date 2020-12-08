@@ -1,0 +1,43 @@
+{% extends 'advanced_admin/base.html' %}
+{% load advanced_admin %}
+
+
+{% block content %}
+
+    <div class="form-group">
+        <a class="btn btn-primary" href="/advanced_admin/{{ app_label }}/{{ model_name }}/create">
+            <span class="fa fa-pen"></span>
+            create
+        </a>
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            {% for col in columns %}
+                <th>{{ col }}</th>
+            {% endfor %}
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for item in model %}
+            <tr>
+                {% for col in columns %}
+                    <td>{% render_column col item %}</td>
+                {% endfor %}
+                <td>
+                    <a href="/advanced_admin/{{ app_label }}/{{ model_name }}/change/{{ item.id }}">
+                        <span class="fa fa-pen"></span>
+                        update
+                    </a>
+                    <a onclick="return confirm('are you sure?');" href="/advanced_admin/{{ app_label }}/{{ model_name }}/delete/{{ item.id }}">
+                        <span class="fa fa-trash"></span>
+                        delete
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

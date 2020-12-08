@@ -1,0 +1,28 @@
+{% extends 'advanced_admin/base.html' %}
+{% load advanced_admin %}
+
+
+{% block content %}
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>name</th>
+            <th>change</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for group in site.menu %}
+            {% for item in group %}
+                <tr>
+                    <td>{{ item.name }}</td>
+                    <td>
+                        <a href="{{ item.url }}">
+                            <span class="fa fa-pen">change</span>
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
