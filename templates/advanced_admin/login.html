@@ -5,6 +5,7 @@
 {% block content %}
     <form method="POST">
         {% csrf_token %}
+        
         {{ form.render|safe }}
 
         <div class="form-group">

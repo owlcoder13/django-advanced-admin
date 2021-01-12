@@ -4,17 +4,42 @@ from django.shortcuts import render, redirect
 from typing import Type
 from .modules import CrudModule
 from forms import forms
+from django.contrib.auth import authenticate, login as make_login
+from main.models import User
 
 
 class LoginModel(object):
     def __init__(self):
-        self.email = None
+        self.login = None
         self.password = None
 
 
 class LoginForm(forms.Form):
-    email = forms.Field()
+
+    login = forms.Field()
     password = forms.Field(attributes={"type": "password"})
+
+    def __init__(self, request=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.user = None
+        self.request = request
+
+    def handle(self):
+        if self.is_valid():
+            make_login(user=self.user, request=self.request)
+
+        return False
+
+    def is_valid(self):
+        valid = super().is_valid()
+
+        self.user = authenticate(self.request, username=self.login.value,
+                            password=self.password.value)
+        if self.user is None:
+            self.add_error('login', 'No user found')
+
+        return len(self.errors.items()) == 0
 
 
 class AdvancedAdmin(object):
@@ -30,7 +55,12 @@ class AdvancedAdmin(object):
 
     def login(self, request):
         instance = LoginModel()
-        form = LoginForm(instance=instance)
+        form = LoginForm(instance=instance, request=request)
+
+        if request.method == 'POST':
+            form.load(data=request.POST)
+            if form.handle():
+                return redirect('/advanced_admin')
 
         return render(request, 'advanced_admin/login.html', {"form": form})
 
