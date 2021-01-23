@@ -5,7 +5,7 @@
 {% block content %}
 
     <div class="form-group">
-        <a class="btn btn-primary" href="/advanced_admin/{{ app_label }}/{{ model_name }}/create">
+        <a class="btn btn-primary" href="/{{ base_url }}/{{ app_label }}/{{ model_name }}/create">
             <span class="fa fa-pen"></span>
             create
         </a>
@@ -27,11 +27,11 @@
                     <td>{% render_column col item %}</td>
                 {% endfor %}
                 <td>
-                    <a href="/advanced_admin/{{ app_label }}/{{ model_name }}/change/{{ item.id }}">
+                    <a href="/{{ base_url }}/{{ app_label }}/{{ model_name }}/change/{{ item.id }}">
                         <span class="fa fa-pen"></span>
                         update
                     </a>
-                    <a onclick="return confirm('are you sure?');" href="/advanced_admin/{{ app_label }}/{{ model_name }}/delete/{{ item.id }}">
+                    <a onclick="return confirm('are you sure?');" href="/{{ base_url }}/{{ app_label }}/{{ model_name }}/delete/{{ item.id }}">
                         <span class="fa fa-trash"></span>
                         delete
                     </a>

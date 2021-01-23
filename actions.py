@@ -20,15 +20,6 @@ class ListAction(Action):
         self.filter_form = filter_form
 
     def run(self, request):
-        breadcrumbs = list()
-        breadcrumbs.append({
-            "url": "/advanced_admin/",
-            "name": "Advanced admin",
-        })
-        breadcrumbs.append({
-            "name": self.model_class.__name__,
-        })
-
         if self.filter_form is not None:
             filter = self.filter_form()
             filter.load(request.GET)
@@ -41,7 +32,6 @@ class ListAction(Action):
         context.update(self.extra_context)
         context.update({
             "filter": filter,
-            "crumbs": breadcrumbs,
             "model": m,
             "title": "list of %s" % self.model_class._meta.model_name,
             "columns": self.columns,
@@ -59,19 +49,6 @@ class ChangeAction(Action):
         self.form_class = form_class
 
     def run(self, request, id=None):
-        breadcrumbs = list()
-        breadcrumbs.append({
-            "url": "/advanced_admin/",
-            "name": "Advanced admin",
-        })
-        breadcrumbs.append({
-            "name": self.model_class.__name__,
-            "url": self.back_url,
-        })
-        breadcrumbs.append({
-            "name": "create",
-        })
-
         if id is not None:
             model = self.model_class.objects.get(pk=id)
         else:
@@ -88,7 +65,6 @@ class ChangeAction(Action):
         context = self.extra_context.copy()
 
         context.update({
-            "crumbs": breadcrumbs,
             "form": form,
             "model": model,
             "title": "list of %s" % self.model_class._meta.model_name

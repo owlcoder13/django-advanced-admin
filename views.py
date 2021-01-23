@@ -51,6 +51,10 @@ class AdvancedAdmin(object):
             path(base_url + '/login', self.login)
         ]
 
+        self.context = {
+            "base_url": self.base_url,
+        }
+
         self.modules = list()
 
     def login(self, request):
@@ -60,27 +64,32 @@ class AdvancedAdmin(object):
         if request.method == 'POST':
             form.load(data=request.POST)
             if form.handle():
-                return redirect('/advanced_admin')
+                return redirect('/' + self.base_url)
 
         return render(request, 'advanced_admin/login.html', {"form": form})
 
     def index(self, request):
-        return render(request, 'advanced_admin/index.html', {
+        context = self.context.copy()
+        
+        context.update({
             'site': self,
             'crumbs': [{"name": "Advanced admin"}]
         })
+
+        return render(request, 'advanced_admin/index.html', context)
 
     def register_crud(self, model_class: Type[Model], columns=None, form_class=None, filter_form=None):
         app_label = model_class._meta.app_label
         model_name = model_class._meta.model_name
 
+        common_context = self.context.copy()
         common_context = {
             "app_label": app_label,
             "model_name": model_name,
             "site": self,
         }
 
-        url_prefix = 'advanced_admin/%s/%s' % (app_label, model_name)
+        url_prefix = '%s/%s/%s' % (self.base_url, app_label, model_name)
 
         module = CrudModule(
             model_class=model_class,
@@ -88,9 +97,14 @@ class AdvancedAdmin(object):
             context=common_context,
             form_class=form_class,
             columns=columns,
-            filter_form=filter_form
+            filter_form=filter_form,
+            base_url=self.base_url
         )
 
+        self.modules.append(module)
+        self.routes += module.urls()
+
+    def add_module(self, module):
         self.modules.append(module)
         self.routes += module.urls()
 
