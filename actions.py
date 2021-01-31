@@ -2,11 +2,15 @@ from django.db.models import Model
 from django.urls import reverse
 from django.http.response import HttpResponseNotFound
 from django.shortcuts import render, redirect
+from .helpers import ReplaceMethodMixin
 
 
-class Action(object):
+class Action(ReplaceMethodMixin, object):
+    def __init__(self, *args, **kwargs):
+        self.request = None
+
     def run(self, request):
-        pass
+        self.request = request
 
     def __call__(self, *args, **kwargs):
         return self.run(*args, **kwargs)
@@ -19,7 +23,7 @@ class ListAction(Action):
         self.extra_context = extra_context or dict()
         self.filter_form = filter_form
 
-    def run(self, request):
+    def get_model(self):
         if self.filter_form is not None:
             filter = self.filter_form()
             filter.load(request.GET)
@@ -27,6 +31,12 @@ class ListAction(Action):
         else:
             filter = None
             m = self.model_class.objects.all()
+        return m
+
+    def run(self, request):
+        super().run(request)
+
+        m = self.get_model()
 
         context = dict()
         context.update(self.extra_context)

@@ -78,7 +78,8 @@ class AdvancedAdmin(object):
 
         return render(request, 'advanced_admin/index.html', context)
 
-    def register_crud(self, model_class: Type[Model], columns=None, form_class=None, filter_form=None):
+    def register_crud(self, model_class: Type[Model], columns=None, form_class=None, filter_form=None,
+    module_class=None):
         app_label = model_class._meta.app_label
         model_name = model_class._meta.model_name
 
@@ -89,9 +90,14 @@ class AdvancedAdmin(object):
             "site": self,
         }
 
+        if module_class is None:
+            module_class = CrudModule
+
         url_prefix = '%s/%s/%s' % (self.base_url, app_label, model_name)
 
-        module = CrudModule(
+        ModuleClass = module_class
+
+        module = ModuleClass(
             model_class=model_class,
             url_prefix=url_prefix,
             context=common_context,
