@@ -112,8 +112,9 @@ class AdvancedAdmin(object):
             base_url=self.base_url
         )
 
-        self.modules.append(module)
-        self.routes += module.urls()
+        # self.modules.append(module)
+        # self.routes += module.urls()
+        self.add_module(module)
 
     def add_module(self, module):
 
