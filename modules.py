@@ -3,8 +3,9 @@ from django.urls import path
 
 
 class Module(object):
-    def __init__(self, *args, url_prefix=None, **kwargs):
+    def __init__(self, *args, url_prefix=None, context=None, **kwargs):
         self.url_prefix = url_prefix or ''
+        self.context = context or dict()
 
     def urls(self):
         return []
@@ -23,20 +24,32 @@ class Module(object):
 
 
 class CrudModule(Module):
-    def __init__(self, *args, model_class, columns=None, name=None,
-                 url_name_prefix=None, context=None,
-                 form_class=None, filter_form=None, base_url=None, **kwargs):
-
+    def __init__(
+        self,
+        *args,
+        model_class=None,
+        columns=None, name=None,
+        url_name_prefix=None, context=None,
+        form_class=None, filter_form=None, base_url=None, **kwargs
+    ):
         super().__init__(*args, **kwargs)
 
         self.model_class = model_class
         self.name = name or model_class._meta.model_name
         self.columns = columns or ['id']
         self.url_name_prefix = url_name_prefix or ''
-        self.context = context
         self.form_class = form_class
         self.filter_form = filter_form
         self.base_url = base_url
+
+        # context for models, and urls
+        app_label = model_class._meta.app_label
+        model_name = model_class._meta.model_name
+
+        self.context.update({
+            "app_label": app_label,
+            "model_name": model_name,
+        })
 
     def menu(self):
         return [

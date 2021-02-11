@@ -35,7 +35,7 @@ class LoginForm(forms.Form):
         valid = super().is_valid()
 
         self.user = authenticate(self.request, username=self.login.value,
-                            password=self.password.value)
+                                 password=self.password.value)
         if self.user is None:
             self.add_error('login', 'No user found')
 
@@ -70,7 +70,7 @@ class AdvancedAdmin(object):
 
     def index(self, request):
         context = self.context.copy()
-        
+
         context.update({
             'site': self,
             'crumbs': [{"name": "Advanced admin"}]
@@ -79,21 +79,26 @@ class AdvancedAdmin(object):
         return render(request, 'advanced_admin/index.html', context)
 
     def register_crud(self, model_class: Type[Model], columns=None, form_class=None, filter_form=None,
-    module_class=None):
-        app_label = model_class._meta.app_label
-        model_name = model_class._meta.model_name
+                      module_class=None):
 
         common_context = self.context.copy()
+
         common_context = {
-            "app_label": app_label,
-            "model_name": model_name,
             "site": self,
+            "base_url": self.base_url
         }
 
         if module_class is None:
             module_class = CrudModule
 
-        url_prefix = '%s/%s/%s' % (self.base_url, app_label, model_name)
+        app_label = model_class._meta.app_label
+        model_name = model_class._meta.model_name
+
+        url_prefix = '%s/%s/%s' % (
+            self.base_url,
+            app_label,
+            model_name
+        )
 
         ModuleClass = module_class
 
@@ -111,9 +116,19 @@ class AdvancedAdmin(object):
         self.routes += module.urls()
 
     def add_module(self, module):
+
+        common_context = self.context.copy()
+        common_context = {
+            "site": self,
+            "base_url": self.base_url
+        }
+
+        module.context.update(common_context)
+
         self.modules.append(module)
         self.routes += module.urls()
 
     def menu(self):
         for m in self.modules:
-            yield m.menu()
+            menus = m.menu()
+            yield menus
