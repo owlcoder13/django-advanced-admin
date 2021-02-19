@@ -2,11 +2,17 @@ from django.db.models import Model
 from django.urls import reverse
 from django.http.response import HttpResponseNotFound
 from django.shortcuts import render, redirect
+from .helpers import ReplaceMethodMixin
+from advanced_admin.widgets import Grid, ButtonColumn
+from forms.html import HtmlHelper
 
 
-class Action(object):
+class Action(ReplaceMethodMixin, object):
+    def __init__(self, *args, **kwargs):
+        self.request = None
+
     def run(self, request):
-        pass
+        self.request = request
 
     def __call__(self, *args, **kwargs):
         return self.run(*args, **kwargs)
@@ -18,17 +24,26 @@ class ListAction(Action):
         self.columns = columns
         self.extra_context = extra_context or dict()
         self.filter_form = filter_form
+        self.grid = None
 
-    def run(self, request):
-        breadcrumbs = list()
-        breadcrumbs.append({
-            "url": "/advanced_admin/",
-            "name": "Advanced admin",
-        })
-        breadcrumbs.append({
-            "name": self.model_class.__name__,
-        })
+        self.columns.append(ButtonColumn(buttons=[
+            lambda item: HtmlHelper.tag('a',
+                                        'update',
+                                        {
+                                            "href": reverse(
+                                                'admin.%s.change' % self.model_class.__name__.lower(), args=[item.id])
+                                        }
+                                        ),
+            lambda item: HtmlHelper.tag('a',
+                                        'delete',
+                                        {
+                                            "href": reverse(
+                                                'admin.%s.delete' % self.model_class.__name__.lower(), args=[item.id])
+                                        }
+                                        )
+        ]))
 
+    def get_model(self):
         if self.filter_form is not None:
             filter = self.filter_form()
             filter.load(request.GET)
@@ -36,12 +51,20 @@ class ListAction(Action):
         else:
             filter = None
             m = self.model_class.objects.all()
+        return m
+
+    def run(self, request):
+        super().run(request)
+
+        m = self.get_model()
+
+        self.grid = Grid(columns=self.columns, data=m)
 
         context = dict()
         context.update(self.extra_context)
         context.update({
+            "grid": self.grid,
             "filter": filter,
-            "crumbs": breadcrumbs,
             "model": m,
             "title": "list of %s" % self.model_class._meta.model_name,
             "columns": self.columns,
@@ -59,19 +82,6 @@ class ChangeAction(Action):
         self.form_class = form_class
 
     def run(self, request, id=None):
-        breadcrumbs = list()
-        breadcrumbs.append({
-            "url": "/advanced_admin/",
-            "name": "Advanced admin",
-        })
-        breadcrumbs.append({
-            "name": self.model_class.__name__,
-            "url": self.back_url,
-        })
-        breadcrumbs.append({
-            "name": "create",
-        })
-
         if id is not None:
             model = self.model_class.objects.get(pk=id)
         else:
@@ -88,7 +98,6 @@ class ChangeAction(Action):
         context = self.extra_context.copy()
 
         context.update({
-            "crumbs": breadcrumbs,
             "form": form,
             "model": model,
             "title": "list of %s" % self.model_class._meta.model_name
