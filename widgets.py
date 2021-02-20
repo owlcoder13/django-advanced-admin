@@ -1,5 +1,5 @@
 from forms.html import HtmlHelper
-from advanced_admin.templatetags.advanced_admin import getattr_dot
+from advanced_admin.templatetags.advanced_admin import getattrdot
 from django.utils.html import mark_safe
 
 
@@ -18,7 +18,7 @@ class DataColumn(object):
         super(DataColumn, self).__init__(*args, **kwargs)
 
     def render_cell(self, item):
-        return HtmlHelper.tag('td', str(getattr_dot(item, self.path)))
+        return HtmlHelper.tag('td', str(getattrdot(item, self.path)))
 
     def render_header(self):
         return self.label or self.path

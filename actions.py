@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect
 from .helpers import ReplaceMethodMixin
 from advanced_admin.widgets import Grid, ButtonColumn
 from forms.html import HtmlHelper
+from .helpers import ReplaceMethodMixin
 
 
 class Action(ReplaceMethodMixin, object):
