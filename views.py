@@ -88,7 +88,7 @@ class AdvancedAdmin(object):
 
         common_context.update({
             "site": self,
-            "base_url": self.base_url
+            "url_prefix": self.base_url
         })
 
         if module_class is None:
@@ -97,49 +97,44 @@ class AdvancedAdmin(object):
         app_label = model_class._meta.app_label
         model_name = model_class._meta.model_name
 
-        url_prefix = '%s' % (
-            model_name
-        )
-
         module_class = module_class
+        base_url = model_name
 
         module = module_class(
             model_class=model_class,
-            url_prefix=url_prefix,
             context=common_context,
             form_class=form_class,
             columns=columns,
             filter_form=filter_form,
-            base_url=self.base_url,
-            route_name='fuck',
-
         )
 
-        self.add_module(module,
-                        route_name=model_name,
-                        url_prefix=model_name
-                        )
+        self.add_module(
+            module,
+            route_prefix='%s.' % model_name,
+            url_prefix=base_url
+        )
 
-    def add_module(self, module, route_name=None, url_prefix=None):
+    def add_module(self, module, route_prefix=None, url_prefix=None):
 
         common_context = self.context.copy()
         common_context.update({
             "site": self,
-            "base_url": self.base_url
+            "base_url": self.base_url + module.url_prefix
         })
 
         module.context.update(common_context)
 
-        route_name = route_name or module.__class__.__name__
+        route_prefix = route_prefix or module.__class__.__name__
 
-        module.route_name = 'admin.' + route_name
+        url_prefix = 'admin/' + url_prefix
+        module.route_prefix = 'admin.' + route_prefix
         module.url_prefix = url_prefix or module.__class__.__name__
 
         self.modules.append(module)
 
         # add routes
         urls = module.urls()
-        route = path(self.base_url, include(urls))
+        route = path('', include(urls))
 
         self.routes.append(route)
 

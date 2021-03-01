@@ -82,6 +82,9 @@ class ChangeAction(Action):
         self.back_url = back_url
         self.form_class = form_class
 
+    def get_redirect_url(self):
+        return self.redirect_url
+
     def run(self, request, id=None):
         if id is not None:
             model = self.model_class.objects.get(pk=id)
@@ -94,7 +97,7 @@ class ChangeAction(Action):
             form.load(data=request.POST, files=request.FILES)
             if form.is_valid():
                 form.save()
-                return redirect(self.redirect_url)
+                return redirect(self.get_redirect_url())
 
         context = self.extra_context.copy()
 
@@ -108,9 +111,10 @@ class ChangeAction(Action):
 
 
 class DeleteAction(Action):
-    def __init__(self, model_class, extra_context=None):
+    def __init__(self, model_class, redirect_url=None, extra_context=None):
         self.model_class = model_class
         self.extra_context = extra_context or dict()
+        self.redirect_url = redirect_url
 
     def run(self, request, id=None):
         if id is None:
@@ -122,4 +126,4 @@ class DeleteAction(Action):
         except self.model_class.DoesNotExist:
             return HttpResponseNotFound()
 
-        return redirect('/' + index_url)
+        return redirect(self.redirect_url)

@@ -4,10 +4,11 @@ from django.http.response import HttpResponse
 
 
 class Module(object):
-    def __init__(self, *args, url_prefix=None, context=None, route_name=None, **kwargs):
+    def __init__(self, *args, url_prefix=None, root_url='admin/', context=None, route_prefix=None, **kwargs):
         self.url_prefix = url_prefix or ''
         self.context = context or dict()
-        self.route_name = route_name or type(self).__name__
+        self.route_prefix = route_prefix or type(self).__name__
+        self.root_url = root_url
 
     def menu(self):
         return list()
@@ -23,18 +24,21 @@ class Module(object):
             url = action_data.get('url', '')
             route = action_data.get('route', None)
 
-            p = self.url_prefix + '/' + url
+            p = self.url_prefix
+            if url != '':
+                p += '/' + url
+
             url_path = path(p, action)
 
             # set route name if exists
-            if self.route_name:
+            if self.route_prefix:
                 if route is None or route == '':
                     name_suffix = ''
                 else:
-                    name_suffix = '.' + route
+                    name_suffix = route
 
-                url_path.name = self.route_name + name_suffix
-                # print('set route name', url_path.name)
+                url_path.name = self.route_prefix + name_suffix
+                print('register url name', url_path.name, p)
 
             urls.append(url_path)
 
@@ -48,7 +52,7 @@ class CrudModule(Module):
             model_class=None,
             columns=None, name=None,
             url_name_prefix=None, context=None,
-            form_class=None, filter_form=None, base_url=None, **kwargs
+            form_class=None, filter_form=None, **kwargs
     ):
         super().__init__(*args, **kwargs)
 
@@ -57,7 +61,6 @@ class CrudModule(Module):
         self.columns = columns or ['id']
         self.form_class = form_class
         self.filter_form = filter_form
-        self.base_url = base_url
 
         # context for models, and urls
         app_label = model_class._meta.app_label
@@ -72,7 +75,7 @@ class CrudModule(Module):
         return [
             {
                 "name": self.model_class._meta.model_name,
-                "url": reverse(self.route_name),
+                "url": reverse(self.route_prefix + 'index'),
             }
         ]
 
@@ -82,7 +85,7 @@ class CrudModule(Module):
     def actions(self):
         breadcrumbs = list()
         breadcrumbs.append({
-            "url": "/%s/" % self.base_url,
+            "url": "/%s" % self.root_url,
             "name": "Advanced admin",
         })
         breadcrumbs.append({
@@ -120,7 +123,7 @@ class CrudModule(Module):
                     filter_form=self.filter_form,
                 ),
                 "url": '',
-                "route": '',
+                "route": 'index',
             },
             {
                 "action": ChangeAction(
@@ -145,7 +148,11 @@ class CrudModule(Module):
                 "route": 'change',
             },
             {
-                "action": DeleteAction(model_class=self.model_class, extra_context=self.context),
+                "action": DeleteAction(
+                    model_class=self.model_class,
+                    extra_context=self.context,
+                    redirect_url='/' + self.url_prefix,
+                ),
                 "url": 'delete/<int:id>',
                 "route": 'delete',
             }
@@ -167,7 +174,7 @@ class PageModule(Module):
         return [
             {
                 "name": self.label,
-                "url": reverse(self.route_name)
+                "url": reverse(self.route_prefix)
             }
         ]
 
