@@ -38,7 +38,7 @@ class Module(object):
                     name_suffix = route
 
                 url_path.name = self.route_prefix + name_suffix
-                print('register url name', url_path.name, p)
+                # print('register url name', url_path.name, p)
 
             urls.append(url_path)
 
