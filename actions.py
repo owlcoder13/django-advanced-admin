@@ -38,6 +38,7 @@ class ListAction(Action):
             lambda item: HtmlHelper.tag('a',
                                         'delete',
                                         {
+                                            "onclick": "return confirm('Are you sure?')",
                                             "href": reverse(
                                                 'admin.%s.delete' % self.model_class.__name__.lower(), args=[item.id])
                                         }
