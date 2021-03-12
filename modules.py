@@ -1,6 +1,8 @@
 from .actions import ListAction, DeleteAction, ChangeAction
 from django.urls import path, reverse
 from django.http.response import HttpResponse
+from advanced_admin.widgets import ButtonColumn
+from forms.html import HtmlHelper
 
 
 class Module(object):
@@ -82,6 +84,28 @@ class CrudModule(Module):
     def modify_actions(self, actions):
         return actions
 
+    def get_columns(self):
+        cols = self.columns.copy()
+        cols.append(ButtonColumn(buttons=[
+            lambda item: HtmlHelper.tag('a',
+                                        'update',
+                                        {
+                                            "href": reverse(
+                                                'admin.%s.change' % self.model_class.__name__.lower(), args=[item.id])
+                                        }
+                                        ),
+            lambda item: HtmlHelper.tag('a',
+                                        'delete',
+                                        {
+                                            "onclick": "return confirm('Are you sure?')",
+                                            "href": reverse(
+                                                'admin.%s.delete' % self.model_class.__name__.lower(), args=[item.id])
+                                        }
+                                        )
+        ]))
+
+        return cols
+
     def actions(self):
         breadcrumbs = list()
         breadcrumbs.append({
@@ -95,6 +119,9 @@ class CrudModule(Module):
 
         list_context = self.context.copy()
         list_context['crumbs'] = breadcrumbs
+
+        # print('route prefix', self.route_prefix)
+        list_context['create_url'] = '/' + self.url_prefix + '/create'
 
         create_bc = breadcrumbs.copy()
         create_bc.append({
@@ -111,6 +138,8 @@ class CrudModule(Module):
         change_context = self.context.copy()
         change_context['crumbs'] = change_bc
 
+        self.get_columns()
+
         # bc = ButtonColumn()
         # self.columns.append(bc)
 
@@ -118,7 +147,7 @@ class CrudModule(Module):
             {
                 "action": ListAction(
                     model_class=self.model_class,
-                    columns=self.columns,
+                    columns=self.get_columns(),
                     extra_context=list_context,
                     filter_form=self.filter_form,
                 ),

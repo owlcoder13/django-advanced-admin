@@ -27,24 +27,6 @@ class ListAction(Action):
         self.filter_form = filter_form
         self.grid = None
 
-        self.columns.append(ButtonColumn(buttons=[
-            lambda item: HtmlHelper.tag('a',
-                                        'update',
-                                        {
-                                            "href": reverse(
-                                                'admin.%s.change' % self.model_class.__name__.lower(), args=[item.id])
-                                        }
-                                        ),
-            lambda item: HtmlHelper.tag('a',
-                                        'delete',
-                                        {
-                                            "onclick": "return confirm('Are you sure?')",
-                                            "href": reverse(
-                                                'admin.%s.delete' % self.model_class.__name__.lower(), args=[item.id])
-                                        }
-                                        )
-        ]))
-
     def get_model(self):
         if self.filter_form is not None:
             filter = self.filter_form()

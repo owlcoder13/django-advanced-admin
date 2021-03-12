@@ -44,6 +44,9 @@ class ButtonColumn(DataColumn):
         super(ButtonColumn, self).__init__(*args, **kwargs)
         self.buttons = buttons or list()
 
+    def add_button(self, func):
+        self.buttons.append(func)
+
     def render_cell(self, item):
         out = list()
 
