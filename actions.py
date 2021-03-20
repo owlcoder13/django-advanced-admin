@@ -1,11 +1,9 @@
 from django.db.models import Model
-from django.urls import reverse
 from django.http.response import HttpResponseNotFound
 from django.shortcuts import render, redirect
+from advanced_admin.widgets import Grid
 from .helpers import ReplaceMethodMixin
-from advanced_admin.widgets import Grid, ButtonColumn
-from forms.html import HtmlHelper
-from .helpers import ReplaceMethodMixin
+from django.contrib.messages import add_message, constants as message_constants
 
 
 class Action(ReplaceMethodMixin, object):
@@ -80,6 +78,7 @@ class ChangeAction(Action):
             form.load(data=request.POST, files=request.FILES)
             if form.is_valid():
                 form.save()
+                add_message(request, message_constants.SUCCESS, 'Сохранено')
                 return redirect(self.get_redirect_url())
 
         context = self.extra_context.copy()
