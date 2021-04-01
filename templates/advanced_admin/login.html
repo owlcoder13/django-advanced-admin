@@ -5,8 +5,10 @@
 {% block content %}
     <form method="POST">
         {% csrf_token %}
-        
-        {{ form.errors }}
+
+        {% if form.errors %}
+            {{ form.errors }}
+        {% endif %}
 
         {{ form.render|safe }}
 

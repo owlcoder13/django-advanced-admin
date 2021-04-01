@@ -1,5 +1,6 @@
 from django.http.response import HttpResponseForbidden
 from django.shortcuts import redirect
+from .helpers import get_settings_value
 
 
 class Middleware(object):
@@ -19,6 +20,6 @@ class Middleware(object):
             if request.user.is_authenticated:
                 return HttpResponseForbidden()
             else:
-                return redirect('/sign-in')
+                return redirect(get_settings_value('ADVANCED_ADMIN_LOGIN_URL', '/login/'))
 
         return None

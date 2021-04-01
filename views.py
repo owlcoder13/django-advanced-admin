@@ -32,11 +32,12 @@ class LoginForm(forms.Form):
 
     def is_valid(self):
         valid = super().is_valid()
+        data = self.values
 
-        self.user = authenticate(self.request, username=self.login.value,
-                                 password=self.password.value)
+        self.user = authenticate(self.request, username=data.get('login'),
+                                 password=data.get('password'))
         if self.user is None:
-            self.add_error('login', 'No user found')
+            self.add_field_error('login', 'No user found')
 
         return len(self.errors.items()) == 0
 
@@ -47,7 +48,7 @@ class AdvancedAdmin(object):
 
         self.routes = [
             path(base_url + '', self.index),
-            path(base_url + 'login', self.login)
+            path('login/', self.login)
         ]
 
         self.context = {
