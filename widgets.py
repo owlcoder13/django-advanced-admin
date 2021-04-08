@@ -21,17 +21,17 @@ class DataColumn(object):
         return HtmlHelper.tag('td', str(getattrdot(item, self.path)))
 
     def render_header(self):
-        return self.label or self.path
+        return self.label or self.path or ''
 
 
-class CallableColumn(object):
+class CallableColumn(DataColumn):
     def __init__(self, *args, cb=None, **kwargs):
         self.cb = cb
 
         super(CallableColumn, self).__init__(*args, **kwargs)
 
-    def render_column(self, item):
-        return str(self.cb(item))
+    def render_cell(self, item):
+        return HtmlHelper.tag('td', str(self.cb(item)))
 
 
 class ButtonColumn(DataColumn):

@@ -2,7 +2,10 @@ from django import template
 
 register = template.Library()
 
+
 def getattrdot(obj, path, default=None):
+    if path is None:
+        return obj
 
     for a in path.split('.'):
         if hasattr(obj, a):
@@ -10,6 +13,7 @@ def getattrdot(obj, path, default=None):
         else:
             return default
     return obj
+
 
 @register.simple_tag()
 def render_column(column, item):
