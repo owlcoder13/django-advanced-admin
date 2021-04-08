@@ -27,6 +27,7 @@ class LoginForm(forms.Form):
     def handle(self):
         if self.is_valid():
             make_login(user=self.user, request=self.request)
+            return True
 
         return False
 
