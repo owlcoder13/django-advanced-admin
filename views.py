@@ -83,6 +83,7 @@ class AdvancedAdmin(object):
                       model_class: Type[Model],
                       columns=None,
                       form_class=None,
+                      name=None,
                       filter_form=None,
                       module_class=None):
 
@@ -106,6 +107,7 @@ class AdvancedAdmin(object):
             model_class=model_class,
             context=common_context,
             form_class=form_class,
+            name=name,
             columns=columns,
             filter_form=filter_form,
         )

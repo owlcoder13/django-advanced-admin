@@ -76,7 +76,7 @@ class CrudModule(Module):
     def menu(self):
         return [
             {
-                "name": self.model_class._meta.model_name,
+                "name": self.name,
                 "url": reverse(self.route_prefix + 'index'),
             }
         ]
