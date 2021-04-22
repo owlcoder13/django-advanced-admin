@@ -121,7 +121,7 @@ class CrudModule(Module):
         list_context['crumbs'] = breadcrumbs
 
         # print('route prefix', self.route_prefix)
-        list_context['create_url'] = '/' + self.url_prefix + '/create'
+        # list_context['create_url'] = '/' + self.url_prefix + '/create'
 
         create_bc = breadcrumbs.copy()
         create_bc.append({
@@ -143,9 +143,17 @@ class CrudModule(Module):
         # bc = ButtonColumn()
         # self.columns.append(bc)
 
+        url_prefix = self.url_prefix
+
+        class _ListAction(ListAction):
+            def create_context(self, request, context_from_run):
+                context = super(_ListAction, self).create_context(request, context_from_run)
+                context.update({'create_url': '/' + url_prefix + '/create'})
+                return context
+
         actions = [
             {
-                "action": ListAction(
+                "action": _ListAction(
                     model_class=self.model_class,
                     columns=self.get_columns(),
                     extra_context=list_context,

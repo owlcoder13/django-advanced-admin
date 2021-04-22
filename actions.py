@@ -10,11 +10,13 @@ class Action(ReplaceMethodMixin, object):
     def __init__(self, *args, **kwargs):
         self.request = None
 
-    def run(self, request):
+    def run(self, request, *args, **kwargs):
         self.request = request
 
-    def __call__(self, *args, **kwargs):
-        return self.run(*args, **kwargs)
+    def __call__(self, request, *args, **kwargs):
+        request.route_args = args
+        request.route_kwargs = kwargs
+        return self.run(request, *args, **kwargs)
 
 
 class ListAction(Action):
@@ -25,6 +27,9 @@ class ListAction(Action):
         self.filter_form = filter_form
         self.grid = None
 
+    def get_queryset(self):
+        return self.model_class.objects
+
     def get_model(self):
         if self.filter_form is not None:
             filter = self.filter_form()
@@ -32,25 +37,28 @@ class ListAction(Action):
             m = filter.get_model()
         else:
             filter = None
-            m = self.model_class.objects.all()
+            m = self.get_queryset().all()
         return m
 
-    def run(self, request):
-        super().run(request)
-
-        m = self.get_model()
-
-        self.grid = Grid(columns=self.columns, data=m)
-
+    def create_context(self, request, context_from_run):
         context = dict()
         context.update(self.extra_context)
         context.update({
             "grid": self.grid,
             "filter": filter,
-            "model": m,
             "title": "list of %s" % self.model_class._meta.model_name,
             "columns": self.columns,
         })
+        context.update(context_from_run)
+
+        return context
+
+    def run(self, request, *args, **kwargs):
+        super().run(request, *args, **kwargs)
+
+        m = self.get_model()
+        self.grid = Grid(columns=self.columns, data=m)
+        context = self.create_context(request, {"model": m})
 
         return render(request, 'advanced_admin/crud/list.html', context)
 
@@ -66,13 +74,16 @@ class ChangeAction(Action):
     def get_redirect_url(self):
         return self.redirect_url
 
-    def run(self, request, id=None):
+    def get_form(self, request, model):
+        return self.form_class(instance=model)
+
+    def run(self, request, id=None, *args, **kwargs):
         if id is not None:
             model = self.model_class.objects.get(pk=id)
         else:
             model = self.model_class()
 
-        form = self.form_class(instance=model)
+        form = self.get_form(request, model)
 
         if request.method == 'POST':
             form.load(data=request.POST, files=request.FILES)
@@ -98,7 +109,7 @@ class DeleteAction(Action):
         self.extra_context = extra_context or dict()
         self.redirect_url = redirect_url
 
-    def run(self, request, id=None):
+    def run(self, request, id=None, *args, **kwargs):
         if id is None:
             return HttpResponseNotFound()
 
