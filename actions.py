@@ -20,7 +20,11 @@ class Action(ReplaceMethodMixin, object):
 
 
 class ListAction(Action):
-    def __init__(self, model_class, columns, extra_context=None, filter_form=None):
+    # defined view template
+    template = 'advanced_admin/crud/list.html'
+
+    def __init__(self, model_class, columns, extra_context=None, filter_form=None, *args, **kwargs):
+        super(ListAction, self).__init__(*args, **kwargs)
         self.model_class = model_class  # type: Model
         self.columns = columns
         self.extra_context = extra_context or dict()
@@ -28,6 +32,9 @@ class ListAction(Action):
         self.grid = None
 
     def get_queryset(self):
+        """
+        You may reorder this method to filter queryset
+        """
         return self.model_class.objects
 
     def get_model(self):
@@ -60,11 +67,15 @@ class ListAction(Action):
         self.grid = Grid(columns=self.columns, data=m)
         context = self.create_context(request, {"model": m})
 
-        return render(request, 'advanced_admin/crud/list.html', context)
+        return render(request, self.template, context)
 
 
 class ChangeAction(Action):
-    def __init__(self, model_class, extra_context=None, form_class=None, redirect_url=None, back_url=None):
+    template = 'advanced_admin/crud/change.html'
+
+    def __init__(self, model_class, extra_context=None, form_class=None, redirect_url=None, back_url=None, *args,
+                 **kwargs):
+        super(ChangeAction, self).__init__(*args, **kwargs)
         self.model_class = model_class  # type: Type[Model]
         self.extra_context = extra_context or dict()
         self.redirect_url = redirect_url
@@ -100,11 +111,12 @@ class ChangeAction(Action):
             "title": "list of %s" % self.model_class._meta.model_name
         })
 
-        return render(request, 'advanced_admin/crud/change.html', context)
+        return render(request, self.template, context)
 
 
 class DeleteAction(Action):
-    def __init__(self, model_class, redirect_url=None, extra_context=None):
+    def __init__(self, model_class, redirect_url=None, extra_context=None, *args, **kwargs):
+        super(DeleteAction, self).__init__(*args, **kwargs)
         self.model_class = model_class
         self.extra_context = extra_context or dict()
         self.redirect_url = redirect_url
