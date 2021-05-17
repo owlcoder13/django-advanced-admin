@@ -16,12 +16,12 @@ class Module(object):
         return list()
 
     def actions(self):
-        return list()
+        return dict()
 
     def urls(self):
         urls = list()
 
-        for action_data in self.actions():
+        for _, action_data in self.actions().items():
             action = action_data.get('action')
             url = action_data.get('url', '')
             route = action_data.get('route', None)
@@ -40,7 +40,6 @@ class Module(object):
                     name_suffix = route
 
                 url_path.name = self.route_prefix + name_suffix
-                # print('register url name', url_path.name, p)
 
             urls.append(url_path)
 
@@ -151,8 +150,8 @@ class CrudModule(Module):
                 context.update({'create_url': '/' + url_prefix + '/create'})
                 return context
 
-        actions = [
-            {
+        actions = {
+            'index': {
                 "action": _ListAction(
                     model_class=self.model_class,
                     columns=self.get_columns(),
@@ -162,7 +161,7 @@ class CrudModule(Module):
                 "url": '',
                 "route": 'index',
             },
-            {
+            'create': {
                 "action": ChangeAction(
                     model_class=self.model_class,
                     extra_context=create_context,
@@ -173,7 +172,7 @@ class CrudModule(Module):
                 "url": 'create',
                 "route": 'create',
             },
-            {
+            'update': {
                 "action": ChangeAction(
                     model_class=self.model_class,
                     extra_context=create_context,
@@ -184,7 +183,7 @@ class CrudModule(Module):
                 "url": 'change/<int:id>',
                 "route": 'change',
             },
-            {
+            'delete': {
                 "action": DeleteAction(
                     model_class=self.model_class,
                     extra_context=self.context,
@@ -193,7 +192,7 @@ class CrudModule(Module):
                 "url": 'delete/<int:id>',
                 "route": 'delete',
             }
-        ]
+        }
 
         return self.modify_actions(actions)
 

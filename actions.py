@@ -82,7 +82,7 @@ class ChangeAction(Action):
         self.back_url = back_url
         self.form_class = form_class
 
-    def get_redirect_url(self):
+    def get_redirect_url(self, model):
         return self.redirect_url
 
     def get_form(self, request, model):
@@ -101,7 +101,7 @@ class ChangeAction(Action):
             if form.is_valid():
                 form.save()
                 add_message(request, message_constants.SUCCESS, 'Сохранено')
-                return redirect(self.get_redirect_url())
+                return redirect(self.get_redirect_url(model))
 
         context = self.extra_context.copy()
 
