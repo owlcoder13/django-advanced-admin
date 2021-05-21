@@ -46,6 +46,31 @@ class Module(object):
         return urls
 
 
+class CrudButtonColumn(ButtonColumn):
+    def __init__(self, *args,
+                 update_url=None,
+                 delete_url=None,
+                 **kwargs):
+        super(CrudButtonColumn, self).__init__()
+        self.buttons += [
+            lambda item: HtmlHelper.tag('a',
+                                        'update',
+                                        {
+                                            "href": update_url(item),
+                                            "class": 'btn btn-primary btn-sm'
+                                        }
+                                        ),
+            lambda item: HtmlHelper.tag('a',
+                                        'delete',
+                                        {
+                                            "onclick": "return confirm('Are you sure?')",
+                                            "href": delete_url(item),
+                                            "class": 'btn btn-danger btn-sm'
+                                        }
+                                        )
+        ]
+
+
 class CrudModule(Module):
     def __init__(
             self,
@@ -85,23 +110,12 @@ class CrudModule(Module):
 
     def get_columns(self):
         cols = self.columns.copy()
-        cols.append(ButtonColumn(buttons=[
-            lambda item: HtmlHelper.tag('a',
-                                        'update',
-                                        {
-                                            "href": reverse(
-                                                'admin.%s.change' % self.model_class.__name__.lower(), args=[item.id])
-                                        }
-                                        ),
-            lambda item: HtmlHelper.tag('a',
-                                        'delete',
-                                        {
-                                            "onclick": "return confirm('Are you sure?')",
-                                            "href": reverse(
-                                                'admin.%s.delete' % self.model_class.__name__.lower(), args=[item.id])
-                                        }
-                                        )
-        ]))
+
+        update_url = lambda item: reverse('admin.%s.change' % self.model_class.__name__.lower(), args=[item.id])
+        delete_url = lambda item: reverse('admin.%s.delete' % self.model_class.__name__.lower(), args=[item.id])
+        button_column = CrudButtonColumn(update_url=update_url, delete_url=delete_url)
+
+        cols.append(button_column)
 
         return cols
 

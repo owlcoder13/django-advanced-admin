@@ -78,7 +78,7 @@ class ChangeAction(Action):
         super(ChangeAction, self).__init__(*args, **kwargs)
         self.model_class = model_class  # type: Type[Model]
         self.extra_context = extra_context or dict()
-        self.redirect_url = redirect_url
+        self.redirect_url = redirect_url or '/admin'
         self.back_url = back_url
         self.form_class = form_class
 
