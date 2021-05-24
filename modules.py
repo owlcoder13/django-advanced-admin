@@ -5,6 +5,12 @@ from advanced_admin.widgets import ButtonColumn
 from forms.html import HtmlHelper
 
 
+class AdminMenuItem(object):
+    def __init__(self, name=None, url=None):
+        self.name = name
+        self.url = url
+
+
 class Module(object):
     def __init__(self, *args, url_prefix=None, root_url='admin/', context=None, route_prefix=None, **kwargs):
         self.url_prefix = url_prefix or ''
@@ -38,6 +44,10 @@ class Module(object):
                     name_suffix = ''
                 else:
                     name_suffix = route
+
+                # Add dots between route parts
+                if name_suffix is not None and self.route_prefix[-1] != '.':
+                    self.route_prefix += '.'
 
                 url_path.name = self.route_prefix + name_suffix
 
@@ -99,10 +109,7 @@ class CrudModule(Module):
 
     def menu(self):
         return [
-            {
-                "name": self.name,
-                "url": reverse(self.route_prefix + 'index'),
-            }
+            AdminMenuItem(name=self.name, url=reverse(self.route_prefix + 'index'))
         ]
 
     def modify_actions(self, actions):
@@ -222,10 +229,7 @@ class PageModule(Module):
 
     def menu(self, *args, **kwargs):
         return [
-            {
-                "name": self.label,
-                "url": reverse(self.route_prefix)
-            }
+            AdminMenuItem(name=self.label, url=reverse(self.route_prefix))
         ]
 
     def actions(self):

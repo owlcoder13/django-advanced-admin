@@ -5,7 +5,6 @@ from typing import Type
 from .modules import CrudModule
 from forms import forms
 from django.contrib.auth import authenticate, login as make_login
-from main.models import User
 
 
 class LoginModel(object):
