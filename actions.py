@@ -88,11 +88,16 @@ class ChangeAction(Action):
     def get_form(self, request, model):
         return self.form_class(instance=model)
 
-    def run(self, request, id=None, *args, **kwargs):
-        if id is not None:
-            model = self.model_class.objects.get(pk=id)
+    def get_model(self, request, *args, **kwargs):
+        if 'id' in kwargs:
+            model = self.model_class.objects.get(pk=kwargs['id'])
         else:
             model = self.model_class()
+
+        return model
+
+    def run(self, request, *args, **kwargs):
+        model = self.get_model(request, *args, **kwargs)
 
         form = self.get_form(request, model)
 
