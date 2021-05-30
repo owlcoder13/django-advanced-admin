@@ -28,6 +28,9 @@ class Module(object):
         urls = list()
 
         for _, action_data in self.actions().items():
+            if not isinstance(action_data, dict):
+                raise Exception('action_data from method actions must be a dict in module ' + type(self).__name__)
+
             action = action_data.get('action')
             url = action_data.get('url', '')
             route = action_data.get('route', None)

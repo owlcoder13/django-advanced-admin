@@ -117,7 +117,16 @@ class AdvancedAdmin(object):
             url_prefix=base_url
         )
 
-    def add_module(self, module, route_prefix=None, url_prefix=None):
+    def add_module(self, module,
+                   route_prefix=None,
+                   url_prefix=None,
+                   ):
+
+        if url_prefix is None:
+            url_prefix = type(module).__name__.lower()
+
+        if route_prefix is None:
+            route_prefix = type(module).__name__.lower()
 
         common_context = self.context.copy()
         common_context.update({
@@ -139,6 +148,21 @@ class AdvancedAdmin(object):
         urls = module.urls()
         route = path('', include(urls))
 
+        self.routes.append(route)
+
+    def register_module(self, module_class, route_prefix=None,
+                        url_prefix=None, module_params=None):
+        if module_params is None:
+            module_params = dict()
+
+        module = module_class(**module_params)
+
+        # append module
+        self.modules.append(module)
+
+        # add routes
+        urls = module.urls()
+        route = path('', include(urls))
         self.routes.append(route)
 
     def menu(self):
