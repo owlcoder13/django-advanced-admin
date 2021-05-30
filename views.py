@@ -156,6 +156,8 @@ class AdvancedAdmin(object):
             module_params = dict()
 
         module = module_class(**module_params)
+        module.url_prefix = 'admin/'
+        module.route_prefix = 'admin.' + route_prefix
 
         # append module
         self.modules.append(module)
