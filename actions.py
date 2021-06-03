@@ -126,14 +126,20 @@ class DeleteAction(Action):
         self.extra_context = extra_context or dict()
         self.redirect_url = redirect_url
 
+    def get_redirect_url(self, model):
+        return self.redirect_url
+
     def run(self, request, id=None, *args, **kwargs):
         if id is None:
             return HttpResponseNotFound()
 
         try:
             model = self.model_class.objects.get(pk=id)
+            redirect_url = self.get_redirect_url(model)
             model.delete()
-        except self.model_class.DoesNotExist:
-            return HttpResponseNotFound()
+            return redirect(redirect_url)
 
-        return redirect(self.redirect_url)
+        except self.model_class.DoesNotExist:
+            pass
+
+        return HttpResponseNotFound()
