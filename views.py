@@ -84,7 +84,7 @@ class AdvancedAdmin(object):
                       form_class=None,
                       name=None,
                       filter_form=None,
-                      module_class=None):
+                      module_class=None, change_route_prefix=None, change_url_prefix=None):
 
         common_context = self.context.copy()
 
@@ -113,8 +113,8 @@ class AdvancedAdmin(object):
 
         self.add_module(
             module,
-            route_prefix='%s.' % model_name,
-            url_prefix=base_url
+            route_prefix=change_route_prefix or '%s.' % model_name,
+            url_prefix=change_url_prefix or base_url
         )
 
     def add_module(self, module,
