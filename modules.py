@@ -85,6 +85,9 @@ class CrudButtonColumn(ButtonColumn):
 
 
 class CrudModule(Module):
+    model_class = None
+    name = None
+
     def __init__(
             self,
             *args,
@@ -95,8 +98,8 @@ class CrudModule(Module):
     ):
         super().__init__(*args, **kwargs)
 
-        self.model_class = model_class
-        self.name = name or model_class._meta.model_name
+        self.model_class = model_class or self.model_class
+        self.name = name or self.name or self.model_class._meta.model_name
         self.columns = columns or ['id']
         self.form_class = form_class
         self.filter_form = filter_form
