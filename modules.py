@@ -292,6 +292,7 @@ class Crud2Module(Module):
             'paginator': self.paginator,
             'page_obj': self.page_obj,
             "title": "list of %s" % self.model_class._meta.model_name,
+            'create_url': reverse('%s.create' % self.route_prefix)
         }
 
     def get_columns(self):

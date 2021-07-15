@@ -10,3 +10,4 @@ class DjangoAdvancedAdminConfig(AppConfig):
         super(DjangoAdvancedAdminConfig, self).ready()
         static_path = os.path.join(settings.BASE_DIR, 'advanced_admin/static')
         settings.STATICFILES_DIR.append(static_path)
+        settings.MIDDLEWARE.append('advanced_admin.middleware.Middleware')
