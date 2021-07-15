@@ -54,7 +54,7 @@ class ButtonColumn(DataColumn):
             l_result = func(item)
             out.append(str(l_result))
 
-        return HtmlHelper.tag('td', ' '.join(out))
+        return HtmlHelper.tag('td', ' '.join(out), {'class': 'grid-button-column'})
 
 
 class Grid(Widget):

@@ -1,0 +1,15 @@
+table {
+    font-size: 12px;
+}
+
+.grid-button-column {
+    white-space: nowrap;
+}
+
+.grid-button-column a {
+    text-decoration: none;
+}
+
+.grid-button-column a svg {
+    width: 20px;
+}

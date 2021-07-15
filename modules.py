@@ -7,6 +7,7 @@ from django.core.paginator import Paginator
 from django.db.models import Model
 from advanced_admin.widgets import Grid
 from django.shortcuts import render, redirect
+from advanced_admin.icons import Icon
 
 
 class AdminMenuItem(object):
@@ -53,8 +54,8 @@ class Module(object):
                     name_suffix = route
 
                 # Add dots between route parts
-                if name_suffix is not None and self.route_prefix[-1] != '.':
-                    self.route_prefix += '.'
+                if name_suffix is not None and name_suffix != '':
+                    name_suffix = '.%s' % name_suffix
 
                 url_path.name = self.route_prefix + name_suffix
 
@@ -71,18 +72,18 @@ class CrudButtonColumn(ButtonColumn):
         super(CrudButtonColumn, self).__init__()
         self.buttons += [
             lambda item: HtmlHelper.tag('a',
-                                        'update',
+                                        Icon.update,
                                         {
                                             "href": update_url(item),
-                                            "class": 'btn btn-primary btn-sm'
+
                                         }
                                         ),
             lambda item: HtmlHelper.tag('a',
-                                        'delete',
+                                        Icon.delete,
                                         {
                                             "onclick": "return confirm('Are you sure?')",
                                             "href": delete_url(item),
-                                            "class": 'btn btn-danger btn-sm'
+
                                         }
                                         )
         ]
@@ -295,8 +296,10 @@ class Crud2Module(Module):
 
     def get_columns(self):
         columns = self.columns.copy()
-        update_url = lambda item: reverse('admin.%s.change' % self.model_class.__name__.lower(), args=[item.id])
-        delete_url = lambda item: reverse('admin.%s.delete' % self.model_class.__name__.lower(), args=[item.id])
+        print('route prefix', self.route_prefix)
+
+        update_url = lambda item: reverse('%s.change' % self.route_prefix, args=[item.id])
+        delete_url = lambda item: reverse('%s.delete' % self.route_prefix, args=[item.id])
         button_column = CrudButtonColumn(update_url=update_url, delete_url=delete_url)
         columns.append(button_column)
         return columns
