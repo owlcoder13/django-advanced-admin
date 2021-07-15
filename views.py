@@ -155,6 +155,8 @@ class AdvancedAdmin(object):
         if module_params is None:
             module_params = dict()
 
+        module_params.update({"extra_context": self.context})
+
         module = module_class(**module_params)
         module.url_prefix = 'admin/' + url_prefix
         module.route_prefix = 'admin.' + route_prefix

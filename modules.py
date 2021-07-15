@@ -3,6 +3,10 @@ from django.urls import path, reverse
 from django.http.response import HttpResponse
 from advanced_admin.widgets import ButtonColumn
 from forms.html import HtmlHelper
+from django.core.paginator import Paginator
+from django.db.models import Model
+from advanced_admin.widgets import Grid
+from django.shortcuts import render, redirect
 
 
 class AdminMenuItem(object):
@@ -166,9 +170,6 @@ class CrudModule(Module):
 
         self.get_columns()
 
-        # bc = ButtonColumn()
-        # self.columns.append(bc)
-
         url_prefix = self.url_prefix
 
         class _ListAction(ListAction):
@@ -246,3 +247,188 @@ class PageModule(Module):
                 'route': "",
             }
         ]
+
+
+class Crud2Module(Module):
+    index_template = 'advanced_admin/crud/list.html'
+    change_template = 'advanced_admin/crud/change.html'
+
+    def __init__(self, *args, name=None, model_class=None,
+                 form_class=None, page_size=10, columns=None,
+                 filter_form_class=None, redirect_url=None, order_by=None,
+                 extra_context=None,
+                 **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.model_class = model_class  # type: type  # The main model class
+        self.form_class = form_class  # form class for change action
+        self.name = name or self.model_class._meta.model_name  # Name of the module
+        self.page_size = page_size  # How much elements show listing page
+        self.columns = columns or ['id']  # which columns showing grid
+        self.model = None  # internal variable for storing model or list of models
+        self.grid = None  # grid widget
+        self.request = None  # store current request
+        self.filter_form = None  # current index filter
+        self.filter_form_class = filter_form_class  # index filter form class
+        self.is_filtered = False  # has filter property?
+        self.args = list()  # store current arguments
+        self.kwargs = dict()  # store current kw arguments
+        self.is_new = False  # is new record for change action
+        self.redirect_url = redirect_url  # redirect after form save
+        self.form = None  # form instance
+        self.is_delete = False  # is delete action
+        self.paginator = None
+        self.page_obj = None
+        self.order_by = order_by
+        self.extra_context = extra_context or dict()
+
+    def index_create_context(self):
+        self.context = self.extra_context.copy()
+
+        self.context = {
+            "model": self.model,
+            "grid": self.grid,
+            'paginator': self.paginator,
+            'page_obj': self.page_obj,
+            "title": "list of %s" % self.model_class._meta.model_name,
+        }
+
+    def get_columns(self):
+        columns = self.columns.copy()
+        update_url = lambda item: reverse('admin.%s.change' % self.model_class.__name__.lower(), args=[item.id])
+        delete_url = lambda item: reverse('admin.%s.delete' % self.model_class.__name__.lower(), args=[item.id])
+        button_column = CrudButtonColumn(update_url=update_url, delete_url=delete_url)
+        columns.append(button_column)
+        return columns
+
+    def index_fetch_model(self):
+        self.model = self.index_get_model(self.request)
+        self.paginator = Paginator(self.model, self.page_size)
+        self.page_obj = self.paginator.get_page(self.request.GET.get('page'))
+
+        self.grid = Grid(columns=self.get_columns(), data=list(self.page_obj))
+
+    def action_index(self, request):
+        self.request = request
+
+        self.prepare_filter()
+        self.index_fetch_model()
+        self.index_create_context()
+
+        return render(request, self.index_template, self.context)
+
+    def prepare_filter(self):
+        if self.filter_form_class:
+            self.filter_form = self.filter_form_class()
+            self.filter_form.load(self.request.GET)
+
+    def menu(self, *args, **kwargs):
+        return [
+            AdminMenuItem(name=self.name, url=reverse(self.route_prefix))
+        ]
+
+    def get_queryset(self, request):
+        """
+            You may reorder this method to filter queryset
+        """
+
+        qs = self.model_class.objects
+
+        if self.order_by:
+            qs.order_by(*self.order_by)
+
+        return qs
+
+    def index_get_model(self, request):
+        model = self.get_queryset(request).all()
+        return model
+
+    def change_get_model(self):
+        id = self.kwargs.get('id', None)
+
+        if id is None:
+            self.is_new = True
+            model_class = self.model_class
+            new_model = model_class()
+            self.model = new_model
+        else:
+            self.model = self.model_class.objects.get(pk=id)
+
+        return self.model
+
+    def get_form(self):
+        form_class = self.form_class
+        return form_class(instance=self.model)
+
+    def redirect(self, model):
+        return redirect(self.redirect_url or reverse(self.route_prefix))
+
+    def after_save(self, form):
+        pass
+
+    def handle_form(self, form):
+        if self.request.method == 'POST':
+            form.load(data=self.request.POST, files=self.request.FILES)
+            if form.is_valid():
+                form.save()
+                self.after_save(form)
+
+                return self.redirect(self.model)
+        return None
+
+    def action_change(self, request, *args, **kwargs):
+        self.request = request
+        self.args = args
+        self.kwargs = kwargs
+
+        model = self.change_get_model()
+        self.form = self.get_form()
+
+        response = self.handle_form(self.form)
+        if response is not None:
+            return response
+
+        context = self.get_change_context()
+
+        return render(request, self.change_template, context)
+
+    def get_change_context(self):
+        ctx = self.extra_context.copy()
+
+        ctx.update({
+            "model": self.model,
+            "form": self.form,
+            "is_new": self.is_new,
+        })
+
+        return ctx
+
+    def action_delete(self, request, *args, **kwargs):
+        self.is_delete = True
+        self.change_get_model()
+        self.model.delete()
+        return self.redirect(self.model)
+
+    def actions(self):
+        return {
+            'index': {
+                "action": self.action_index,
+                "url": "",
+                'route': "",
+            },
+            'update': {
+                "action": self.action_change,
+                "url": "<int:id>/change",
+                'route': "change",
+            },
+            'create': {
+                "action": self.action_change,
+                "url": "create",
+                'route': "create",
+            },
+            'delete': {
+                "action": self.action_delete,
+                "url": "<int:id>/delete",
+                'route': "delete",
+            }
+        }
