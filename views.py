@@ -113,7 +113,7 @@ class AdvancedAdmin(object):
 
         self.add_module(
             module,
-            route_prefix=change_route_prefix or '%s.' % model_name,
+            route_prefix=change_route_prefix or '%s' % model_name,
             url_prefix=change_url_prefix or base_url
         )
 

@@ -120,7 +120,7 @@ class CrudModule(Module):
 
     def menu(self):
         return [
-            AdminMenuItem(name=self.name, url=reverse(self.route_prefix + 'index'))
+            AdminMenuItem(name=self.name, url=reverse(self.route_prefix + '.index'))
         ]
 
     def modify_actions(self, actions):
