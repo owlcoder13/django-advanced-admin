@@ -43,12 +43,23 @@ class LoginForm(forms.Form):
 
 
 class AdvancedAdmin(object):
-    def __init__(self, base_url='advanced_admin'):
+    def __init__(self, base_url='/advanced_admin'):
         self.base_url = base_url
 
+        # normalize base url starts
+        if not base_url.startswith('/'):
+            self.base_url = '/' + self.base_url
+
+        # normalize base url ends
+        if base_url.endswith('/'):
+            self.base_url = self.base_url[0:-1]
+
+        path_base_url = base_url[1:]
+
         self.routes = [
-            path(base_url + '', self.index),
-            path('login/', self.login)
+            path(path_base_url + '', self.index, name='admin'),
+            path(path_base_url + '/login', self.login, name='admin.login'),
+            path(path_base_url + '/logout', self.logout, name='admin.logout')
         ]
 
         self.context = {
@@ -57,6 +68,9 @@ class AdvancedAdmin(object):
 
         self.modules = list()
 
+    def logout(self, request):
+        return redirect('/')
+
     def login(self, request):
         instance = LoginModel()
         form = LoginForm(instance=instance, request=request)
@@ -64,7 +78,7 @@ class AdvancedAdmin(object):
         if request.method == 'POST':
             form.load(data=request.POST)
             if form.handle():
-                return redirect('/' + self.base_url)
+                return redirect(self.base_url)
 
         return render(request, 'advanced_admin/login.html', {"form": form})
 
@@ -73,7 +87,9 @@ class AdvancedAdmin(object):
 
         context.update({
             'site': self,
-            'crumbs': [{"name": "Advanced admin"}]
+            'crumbs': [{
+                "name": "Advanced admin"
+            }]
         })
 
         return render(request, 'advanced_admin/index.html', context)

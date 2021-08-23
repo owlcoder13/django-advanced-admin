@@ -7,7 +7,7 @@
         {% csrf_token %}
 
         {% if form.errors %}
-            {{ form.errors }}
+            {% render_form_errors form.errors %}
         {% endif %}
 
         {{ form.render|safe }}

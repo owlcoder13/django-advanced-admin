@@ -1,0 +1,9 @@
+{% if errors %}
+    <ul class="alert alert-danger">
+        {% for k, lst in errors.items %}
+            <li>
+                {{ lst|join:", " }}
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}

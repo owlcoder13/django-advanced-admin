@@ -47,7 +47,12 @@
                 </div>
             </li>
         </ul>
-        <a href="/{{ base_url }}/login" class="navbar-brand">sign in</a>
+
+        {% if user.is_authenticated %}
+            <a href="/{{ base_url }}logout" class="navbar-brand">logout ({{ user.username }})</a>
+        {% else %}
+            <a href="/{{ base_url }}login" class="navbar-brand">sign in</a>
+        {% endif %}
     </div>
 </nav>
 
@@ -57,23 +62,25 @@
 
         <h1 class="display-4">{{ title }}</h1>
 
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                {% for item in crumbs %}
-                    {% if item.url %}
-                        <li class="breadcrumb-item">
-                            <a href="{{ item.url }}">
+        {% if crumbs %}
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    {% for item in crumbs %}
+                        {% if item.url %}
+                            <li class="breadcrumb-item">
+                                <a href="{{ item.url }}">
+                                    {{ item.name }}
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="breadcrumb-item active" aria-current="page">
                                 {{ item.name }}
-                            </a>
-                        </li>
-                    {% else %}
-                        <li class="breadcrumb-item active" aria-current="page">
-                            {{ item.name }}
-                        </li>
-                    {% endif %}
-                {% endfor %}
-            </ol>
-        </nav>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ol>
+            </nav>
+        {% endif %}
 
         {% if messages %}
             <div class="row">

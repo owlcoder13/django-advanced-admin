@@ -32,7 +32,12 @@ class Module(object):
     def urls(self):
         urls = list()
 
-        for _, action_data in self.actions().items():
+        acts = self.actions()
+
+        if not isinstance(acts, dict):
+            raise Exception("Value return from module.actions() must be dict: %s" % self)
+
+        for _, action_data in acts.items():
             if not isinstance(action_data, dict):
                 raise Exception('action_data from method actions must be a dict in module ' + type(self).__name__)
 
@@ -241,13 +246,13 @@ class PageModule(Module):
         ]
 
     def actions(self):
-        return [
-            {
+        return {
+            "index": {
                 "action": self.action,
                 "url": "",
                 'route': "",
             }
-        ]
+        }
 
 
 class Crud2Module(Module):
