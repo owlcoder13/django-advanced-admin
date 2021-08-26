@@ -54,7 +54,7 @@ class AdvancedAdmin(object):
         if base_url.endswith('/'):
             self.base_url = self.base_url[0:-1]
 
-        path_base_url = base_url[1:]
+        path_base_url = self.base_url[1:]
 
         self.routes = [
             path(path_base_url + '', self.index, name='admin'),

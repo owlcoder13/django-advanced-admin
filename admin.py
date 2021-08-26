@@ -1,6 +1,7 @@
 from .views import AdvancedAdmin
 import os
 from django.conf import settings
+from django.urls.resolvers import URLResolver
 
 
 def get_settings_root():
@@ -28,6 +29,17 @@ class AdminService(object):
 
     def set_admin(self, admin_app):
         self.admin = admin_app
+
+    def print_routes(self):
+        def get_url_patterns(input):
+            if isinstance(input, URLResolver):
+                return input.url_patterns
+            else:
+                return [input]  # now it is URLPattern
+
+        for r in self.routes:
+            for p in get_url_patterns(r):
+                print('\t url: %s => %s' % (p.name, p.pattern))
 
     @property
     def routes(self):

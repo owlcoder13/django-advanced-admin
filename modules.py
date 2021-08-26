@@ -375,10 +375,14 @@ class Crud2Module(Module):
     def after_save(self, form):
         pass
 
+    def before_save(self, form):
+        pass
+
     def handle_form(self, form):
         if self.request.method == 'POST':
             form.load(data=self.request.POST, files=self.request.FILES)
             if form.is_valid():
+                self.before_save(form)
                 form.save()
                 self.after_save(form)
 
