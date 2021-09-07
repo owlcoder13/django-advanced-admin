@@ -417,9 +417,16 @@ class Crud2Module(Module):
         return ctx
 
     def action_delete(self, request, *args, **kwargs):
+        self.request = request
+        self.args = args
+        self.kwargs = kwargs
+
         self.is_delete = True
         self.change_get_model()
-        self.model.delete()
+
+        if self.model.id:
+            self.model.delete()
+
         return self.redirect(self.model)
 
     def actions(self):
