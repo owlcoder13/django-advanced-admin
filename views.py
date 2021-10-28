@@ -5,6 +5,7 @@ from typing import Type
 from .modules import CrudModule
 from forms import forms
 from django.contrib.auth import authenticate, login as make_login
+from django.contrib.auth import logout as make_logout
 
 
 class LoginModel(object):
@@ -45,6 +46,7 @@ class LoginForm(forms.Form):
 class AdvancedAdmin(object):
     def __init__(self, base_url='/advanced_admin'):
         self.base_url = base_url
+        self.site_name = 'Django Advanced Admin'
 
         # normalize base url starts
         if not base_url.startswith('/'):
@@ -69,6 +71,7 @@ class AdvancedAdmin(object):
         self.modules = list()
 
     def logout(self, request):
+        make_logout(request)
         return redirect('/')
 
     def login(self, request):

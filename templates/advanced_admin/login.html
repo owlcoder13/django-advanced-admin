@@ -3,7 +3,7 @@
 
 
 {% block content %}
-    <form method="POST">
+    <form method="POST" style="max-width: 300px">
         {% csrf_token %}
 
         {% if form.errors %}
@@ -12,7 +12,7 @@
 
         {{ form.render|safe }}
 
-        <div class="form-group">
+        <div class="mb-3">
             <button class="btn btn-primary" type="submit">Login</button>
         </div>
     </form>

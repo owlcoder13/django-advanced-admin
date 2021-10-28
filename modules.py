@@ -394,7 +394,7 @@ class Crud2Module(Module):
         self.args = args
         self.kwargs = kwargs
 
-        model = self.change_get_model()
+        self.model = self.change_get_model()
         self.form = self.get_form()
 
         response = self.handle_form(self.form)

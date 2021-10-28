@@ -13,3 +13,42 @@ table {
 .grid-button-column a svg {
     width: 20px;
 }
+
+.page-wrap {
+    width: 100%;
+    display: flex;
+
+}
+
+.page-wrap .page-content {
+    flex: 1;
+    min-height: calc(100vh - 56px);
+}
+
+.sidebar {
+    background: linear-gradient(45deg, #202124, #454545);
+    color: white;
+    min-width: 300px;
+    padding: 20px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar .nav {
+    padding-left: 20px;
+    flex-direction: column;
+}
+
+.sidebar .nav-item {
+    list-style: disc;
+    display: block;
+    margin-bottom: 20px;
+}
+
+.sidebar a {
+    color: white;
+    text-decoration: none;
+}
+
+.sidebar a:hover {
+    text-decoration: underline;
+}

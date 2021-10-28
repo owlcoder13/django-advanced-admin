@@ -37,7 +37,6 @@ class AdminService(object):
     def routes(self):
 
         for app in settings.INSTALLED_APPS:
-            print('search app', app)
             if app == 'advanced_admin':
                 continue
 
