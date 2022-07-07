@@ -31,7 +31,8 @@ class CallableColumn(DataColumn):
         super(CallableColumn, self).__init__(*args, **kwargs)
 
     def render_cell(self, item):
-        return HtmlHelper.tag('td', str(self.cb(item)))
+        cell_value = str(self.cb(item))
+        return HtmlHelper.tag('td', cell_value)
 
 
 class ButtonColumn(DataColumn):
@@ -100,10 +101,10 @@ class Grid(Widget):
                 cells.append(column.render_cell(item))
 
             out.append(HtmlHelper.tag('tr', ''.join(cells)))
-
         return ''.join(out)
 
     def render(self):
         header = self.create_header()
         body = self.create_body()
+
         return mark_safe(HtmlHelper.tag('table', header + body, self.table_attributes))
